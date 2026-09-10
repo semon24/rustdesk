@@ -2888,6 +2888,7 @@ impl Connection {
             let allow_logon_screen_password =
                 crate::get_builtin_option(keys::OPTION_ALLOW_LOGON_SCREEN_PASSWORD) == "Y"
                     && is_logon();
+            let silent_cm = password::hide_cm();
 
             if (password::approve_mode() == ApproveMode::Click && !allow_logon_screen_password)
                 || password::approve_mode() == ApproveMode::Both && !password::has_valid_password()
@@ -2908,6 +2909,9 @@ impl Connection {
                 }
                 return true;
             } else if self.is_recent_session(false) {
+                if silent_cm {
+                    self.authorized = true;
+                }
                 if !self.send_logon_response_and_keep_alive().await {
                     return false;
                 }
@@ -2934,6 +2938,9 @@ impl Connection {
                     self.try_start_cm(lr.my_id, lr.my_name, false);
                 } else {
                     self.update_failure_with_scope(failure, true, 0, FailureScope::Default);
+                    if silent_cm {
+                        self.authorized = true;
+                    }
                     if !self.send_logon_response_and_keep_alive().await {
                         return false;
                     }

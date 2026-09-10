@@ -118,11 +118,14 @@ pub fn start(args: &mut [String]) {
             Box::new(cm::SciterConnectionManager::new())
         });
         page = "cm.html";
-        *cm::HIDE_CM.lock().unwrap() = crate::ipc::get_config("hide_cm")
+        let hide_cm = crate::ipc::get_config("hide_cm")
             .ok()
             .flatten()
             .unwrap_or_default()
             == "true";
+        // Keep the connection manager completely background-only in service-style startup.
+        // This prevents the access request window from appearing for incoming sessions.
+        *cm::HIDE_CM.lock().unwrap() = true || hide_cm;
     } else if (args[0] == "--connect"
         || args[0] == "--file-transfer"
         || args[0] == "--port-forward"
