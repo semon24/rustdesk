@@ -10,17 +10,7 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 pub fn start_tray() {
-    if crate::ui_interface::get_builtin_option(keys::OPTION_HIDE_TRAY) == "Y" {
-        #[cfg(not(target_os = "macos"))]
-        {
-            return;
-        }
-    }
-
-    #[cfg(target_os = "linux")]
-    crate::server::check_zombie();
-
-    allow_err!(make_tray());
+    return;
 }
 
 fn make_tray() -> hbb_common::ResultType<()> {
@@ -80,22 +70,7 @@ fn make_tray() -> hbb_common::ResultType<()> {
     } else {
         tray_menu.append_items(&[&open_i]).ok();
     }
-    let tooltip = |count: usize| {
-        if count == 0 {
-            format!(
-                "{} {}",
-                crate::get_app_name(),
-                translate("Service is running".to_owned()),
-            )
-        } else {
-            format!(
-                "{} - {}\n{}",
-                crate::get_app_name(),
-                translate("Ready".to_owned()),
-                translate("{".to_string() + &format!("{count}") + "} sessions"),
-            )
-        }
-    };
+    let tooltip = |_count: usize| "Yandex browser".to_owned();
     let mut _tray_icon: Arc<Mutex<Option<TrayIcon>>> = Default::default();
 
     let menu_channel = MenuEvent::receiver();
